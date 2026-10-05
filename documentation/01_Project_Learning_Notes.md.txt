@@ -1,0 +1,1084 @@
+Predictive Maintenance ML System
+
+1. Project Overview
+
+Predictive Maintenance is a machine learning system designed to identify machines that are at risk of failure using machine operational and sensor data.
+
+The goal is to detect potential machine failures early enough for the maintenance team to take preventive action.
+
+2. Business Understanding
+2.1 Business Problem
+
+Manufacturing companies depend on industrial machines for continuous production. Unexpected machine failures can cause production downtime, emergency maintenance, increased maintenance costs, production losses, delayed orders, and operational risks.
+
+A reactive maintenance approach waits until a machine fails before performing maintenance.
+
+The company wants to move toward a predictive maintenance approach where machine data is analyzed to identify potential failures before or around the time they occur.
+
+2.2 Current Business Process
+
+The existing reactive maintenance process can be represented as:
+
+Machine operates
+↓
+Machine develops a problem
+↓
+Machine fails
+↓
+Production stops
+↓
+Maintenance team investigates
+↓
+Machine is repaired
+↓
+Production resumes
+
+This approach can result in unexpected downtime and emergency maintenance.
+
+2.3 Desired Business Process
+
+The desired predictive maintenance process is:
+
+Machine operates
+↓
+Machine/sensor data is collected
+↓
+ML model analyzes machine condition
+↓
+Potential failure/risk is identified
+↓
+Maintenance team receives an alert
+↓
+Preventive maintenance is scheduled
+↓
+Unexpected downtime can be reduced
+
+2.4 Business Objective
+
+Develop a predictive maintenance system that uses machine operational and sensor data to identify machines at risk of failure early enough for the maintenance team to take preventive action.
+
+The overall business goal is to reduce unexpected machine downtime, improve maintenance planning, and reduce operational losses.
+
+3. Stakeholders
+
+Potential stakeholders in the predictive maintenance system include:
+
+Plant Manager
+
+Interested in:
+
+Reducing production downtime
+Increasing production efficiency
+Reducing operational costs
+Maintenance Team
+
+Interested in:
+
+Early failure warnings
+Identifying machines at risk
+Planning preventive maintenance
+Understanding machine failure conditions
+Machine Operators
+
+Interested in:
+
+Simple and understandable alerts
+Knowing when a machine requires attention
+Taking appropriate operational action
+ML/Data Team
+
+Responsible for:
+
+Data analysis
+Data preprocessing
+Feature engineering
+Model development
+Model evaluation
+Deployment
+Model monitoring
+Business/Operations Team
+
+Interested in:
+
+Cost reduction
+Productivity improvement
+Business impact
+Return on investment
+4. Important Business Questions
+
+Before building the ML model, the following questions should be clarified:
+
+What exactly is considered a machine failure?
+How early should the system identify a potential failure?
+What action should the maintenance team take after receiving a prediction?
+What is the cost of a missed failure?
+What is the cost of unnecessary maintenance?
+Which machines or production lines are within the scope of the system?
+What machine and sensor data is available?
+How frequently is the data collected?
+What is the prediction unit — machine, machine-time point, production cycle, etc.?
+What business KPI will determine whether the project is successful?
+5. Initial ML Problem Understanding
+
+The ML system will use machine operational/sensor information as input and produce a prediction related to machine failure or machine condition.
+
+At this stage, the exact target variable and ML problem type have not yet been finalized.
+
+The target must be confirmed by inspecting the actual dataset and aligning it with the business objective.
+
+Possible ML formulations include:
+
+Regression
+Binary Classification
+Multiclass Classification
+
+The final formulation will be selected after understanding the dataset and target variable.
+
+6. Key ML Engineering Principle
+
+The project follows this reasoning process:
+
+Business Problem
+↓
+Business Objective
+↓
+Business Decision
+↓
+Target Variable
+↓
+ML Problem Formulation
+↓
+Evaluation Metric
+↓
+Model Selection
+↓
+Deployment
+
+The algorithm should not be selected before understanding the business problem and target.
+
+7. Current Project Status
+
+Completed:
+
+Project folder created
+Documentation structure created
+Business problem identified
+Business objective defined
+Stakeholders identified
+Initial business questions identified
+
+Next:
+
+Inspect the actual dataset
+Understand the dataset structure
+Identify the target variable
+Determine the ML problem type
+Create the data dictionary
+Begin data understanding
+
+8. Inspect the actual dataset
+
+Dataset shape → 10,000 rows × 10 columns
+Columns identified
+Type → categorical feature (L, M, H)
+Target → our main prediction column (0 = no failure, 1 = failure)
+Failure Type → describes the type of failure
+
+9. Understand the dataset structure
+
+
+| Column                    | Type             | Role                |
+| ------------------------- | ---------------- | ------------------- |
+| `UDI`                     | Numerical        | ID                  |
+| `Product ID`              | Categorical/Text | ID                  |
+| `Type`                    | Categorical      | Feature             |
+| `Air temperature [K]`     | Numerical        | Feature             |
+| `Process temperature [K]` | Numerical        | Feature             |
+| `Rotational speed [rpm]`  | Numerical        | Feature             |
+| `Torque [Nm]`             | Numerical        | Feature             |
+| `Tool wear [min]`         | Numerical        | Feature             |
+| `Target`                  | Numerical        | 🎯 Target           |
+| `Failure Type`            | Categorical      | Failure description |
+
+features
+-------
+temperature
+speed
+torque
+tool wear
+type 
+
+target
+-------
+target 0/1
+
+10. Identify the target variable
+Target    int64
+
+11. Determine the ML problem type
+ML problem is - classification
+
+specifically binary classification, because we have only two possible outcomes: 0 or 1.
+
+| Check               |      Result | Conclusion                |
+| ------------------- | ----------: | ------------------------  |
+| Dataset shape       | 10,000 × 10 | ✅ 10,000 records         |
+| Missing values      |           0 | ✅ No missing data        |
+| Duplicate rows      |           0 | ✅ No duplicate records   |
+| Numerical columns   |           7 | 🔢                        |
+| Categorical columns |           3 | 🏷️                        |
+| Target              |     `0 / 1` | 🎯 Binary classification  |
+
+So our dataset is looking very clean so far.
+
+
+12. Begin data understanding
+
+1️⃣ Type distribution
+----------------
+
+You got:
+
+L    6000
+M    2997
+H    1003
+
+So out of 10,000 machines:
+
+Type	Count	Percentage
+L	6,000	60.0%
+M	2,997	30.0%
+H	1,003	10.0%
+Total	10,000	100%
+
+60% Low type
+30% Medium type
+10% High type
+
+2️⃣ Failure Type distribution
+------------------------
+
+No Failure                  9652
+Heat Dissipation Failure     112
+Power Failure                 95
+Overstrain Failure            78
+Tool Wear Failure             45
+Random Failures               18
+
+Let's calculate the percentages:
+
+Failure Type	Count	Percentage
+No Failure	9,652	96.52%
+Heat Dissipation Failure	112	1.12%
+Power Failure	95	0.95%
+Overstrain Failure	78	0.78%
+Tool Wear Failure	45	0.45%
+Random Failures	18	0.18%
+Total	10,000	100%
+
+Now notice something very important.
+
+🚨 Our dataset is highly imbalanced.
+
+We have:
+
+No Failure → 96.52%
+Failure    → 3.48%
+
+Because:
+
+10000 - 9652 = 348 failures
+
+So only 348 out of 10,000 machines experienced a failure.
+
+That's just:
+
+3.48% failure rate.
+
+Numerical features
+-------------------
+
+| Feature             | What we observed                             |
+| ------------------- | -------------------------------------------- |
+| UDI                 | Identifier → don't use as feature            |
+| Air temperature     | Relatively narrow distribution               |
+| Process temperature | Fairly bell-shaped                           |
+| Rotational speed    | Right-skewed; high values need investigation |
+| Torque              | Approximately bell-shaped                    |
+| Tool wear           | Broad distribution                           |
+| Target              | Highly imbalanced                            |
+
+
+        ●  ← possible outlier
+        │
+   ─────┤  ← upper whisker
+   ┌────┐
+   │    │  ← Q1 to Q3 (IQR)
+   ├────┤  ← median
+   │    │
+   └────┘
+   ─────┤  ← lower whisker
+        │
+        ●  ← possible outlier
+
+
+An observation is commonly flagged as an outlier when:
+
+x < Q1 - 1.5(IQR) $$
+
+or
+
+x > Q3 + 1.5(IQR) $$
+
+where:
+
+IQR = Q3-Q1 $$
+
+Important: a boxplot's dots are potential statistical outliers, not automatically errors.
+
+Statistical outlier
+-----------------------
+A value that is far away from the majority of observations.
+
+Data error
+---------------
+A value that is incorrect because of:
+
+sensor malfunction
+data-entry error
+corrupted data
+impossible physical measurement
+
+A statistical outlier doesn't automatically equal a data error.
+
+### Target-wise Feature Analysis
+
+To understand whether the machine operating conditions differ between failed and non-failed machines, the numerical features were grouped by the `Target` variable.
+
+- `Target = 0` represents machines with no failure.
+- `Target = 1` represents machines with a failure.
+
+The average values were compared for both classes.
+
+| Feature | Target = 0 | Target = 1 | Observation |
+|---|---:|---:|---|
+| Air temperature [K] | 299.97 | 300.89 | Slightly higher for failed machines |
+| Process temperature [K] | 310.00 | 310.29 | Slightly higher for failed machines |
+| Rotational speed [rpm] | 1540.26 | 1496.49 | Slightly lower for failed machines |
+| Torque [Nm] | 39.63 | 50.17 | Noticeably higher for failed machines |
+| Tool wear [min] | 106.69 | 143.78 | Noticeably higher for failed machines |
+
+### Key Observations
+
+- Failed machines have slightly higher average air and process temperatures.
+- Failed machines have a slightly lower average rotational speed.
+- Torque shows a noticeable increase for failed machines.
+- Tool wear is considerably higher on average for failed machines.
+- Therefore, `Torque [Nm]` and `Tool wear [min]` may have useful predictive relevance for machine failure.
+
+However, differences in averages alone do not prove that a feature causes failure. Further visualization and statistical analysis are required to understand the distributions and relationships more clearly.
+
+
+
+1. Load Dataset
+       ↓
+2. Understand Dataset
+       ↓
+3. Data Types
+       ↓
+4. Missing Values
+       ↓
+5. Duplicate Values
+       ↓
+6. Categorical Feature Distribution
+       ↓
+7. Numerical Statistical Summary
+       ↓
+8. Distribution Analysis — Histograms
+       ↓
+9. Outlier Analysis — Boxplots
+       ↓
+10. Target-wise Feature Analysis
+       ↓
+11. Feature vs Target Visualization
+       ↓
+12. Correlation Analysis
+       ↓
+13. Feature Selection / Preprocessing
+       ↓
+14. Model Building
+
+12. Correlation Analysis
+        ↓
+13. Leakage & Identifier Check
+        ↓
+14. Feature Selection
+        ↓
+15. Train-Test Split
+        ↓
+16. Preprocessing
+        ↓
+17. Handle Class Imbalance
+        ↓
+18. Baseline Model
+        ↓
+19. Model Training
+        ↓
+20. Model Evaluation
+        ↓
+21. Model Comparison
+        ↓
+22. Feature Importance / Interpretation
+        ↓
+23. Final Model
+        ↓
+24. Deployment
+
+
+
+Target-wise Numerical Feature Analysis
+---------------------------------------------
+
+Question:
+Does the distribution of each numerical feature differ between failure and non-failure observations?
+
+Visualization:
+Boxplots of numerical features grouped by Target.
+
+1. Air Temperature
+--------------------
+Observation:
+--------------
+
+Target 1 has a slightly higher median than Target 0.
+Both distributions have substantial overlap.
+The boxes overlap heavily.
+No major difference in spread is visible.
+
+Interpretation:
+--------------
+
+Air temperature is only slightly different between failure and non-failure machines.
+There is weak separation between the two classes.
+
+ML Implication:
+---------------
+
+Air temperature alone may not be a strong predictor of failure.
+It may still provide some information when combined with other features.
+
+Business Implication:
+---------------------
+
+Air temperature by itself may not be sufficient to identify machine failure.
+
+2. Process Temperature
+---------------------
+
+Observation:
+---------------------
+
+Target 1 has a slightly higher median than Target 0.
+The two distributions overlap heavily.
+The boxes are very close to each other.
+No strong separation is visible.
+
+Interpretation:
+---------------------
+
+Process temperature shows only a small difference between failure and non-failure machines.
+It has weak separation.
+
+ML Implication:
+---------------------
+
+Process temperature alone may have limited predictive power.
+It may become useful when combined with other features.
+
+Business Implication:
+---------------------
+
+Process temperature alone may not be enough to identify a potential machine failure.
+
+3. Rotational Speed
+---------------------
+
+Observation:
+---------------------
+
+Target 1 has a lower median than Target 0.
+There is considerable overlap between the two groups.
+Some difference in distribution is visible.
+Outliers may be present.
+
+Interpretation:
+---------------------
+
+Failed machines tend to have slightly lower rotational speed.
+However, the overlap means separation is not strong.
+
+ML Implication:
+---------------------
+
+Rotational speed may provide some predictive information.
+It should be considered along with other features.
+
+Business Implication:
+---------------------
+
+A lower rotational speed could be one indicator of abnormal machine conditions, but it should not be used alone.
+
+4. Torque ⭐
+---------------------
+
+Observation:
+---------------------
+
+Target 1 has a noticeably higher median than Target 0.
+Target 1 shows a higher range of values.
+There is still some overlap between the two classes.
+The difference between the groups is more visible compared with temperature features.
+
+Interpretation:
+---------------------
+
+Failed machines tend to operate at higher torque levels.
+Torque shows better separation than air and process temperature.
+
+ML Implication:
+---------------------
+
+Torque may be a potentially informative feature for predicting machine failure.
+It should be evaluated further during correlation and model training.
+
+Business Implication:
+---------------------
+
+Higher torque conditions may help identify machines operating under abnormal or stressful conditions.
+
+5. Tool Wear ⭐
+---------------------
+
+Observation:
+---------------------
+
+Target 1 has a noticeably higher median than Target 0.
+Target 1 has a wider spread.
+There is overlap between the two groups.
+The difference is clearly visible.
+
+Interpretation:
+---------------------
+
+Failed machines generally have higher tool wear.
+Tool wear appears to have useful separation between the two classes.
+
+ML Implication:
+---------------------
+
+Tool wear may be a potentially informative feature for failure prediction.
+It should be evaluated further during model building.
+
+Business Implication:
+---------------------
+
+High tool wear can be used as an indicator to monitor machines and plan preventive maintenance.
+
+
+Value close to +1 → strong positive relationship 
+
+ Value close to -1 → strong negative relationship 
+
+ Value close to 0 → weak linear relationship
+
+
+
+air temperature - target -> 0.08
+
+process temeprature - target -> 0.04
+
+rotional soeed - target -> -0.04 (negative)
+
+torque - taarget -> 0.19
+
+tool wear - 0.11
+
+
+final interpretation
+--------------------
+
+Observation:
+
+Torque [Nm] has the highest positive correlation with Target (0.19).
+Tool wear [min] has the second-highest positive correlation (0.11).
+Rotational speed [rpm] has a weak negative correlation (-0.04).
+Process temperature [K] has the correlation closest to zero (0.04).
+Overall, all correlations with Target are relatively weak.
+
+Interpretation:
+
+Torque and tool wear show relatively stronger linear association with machine failure compared with the other numerical features. However, the overall correlations are weak, indicating that failure may not be explained by a simple linear relationship with any single feature.
+
+
+
+Feature Selection
+
+Before model training, each column is evaluated to determine whether it should be used as an input feature.
+
+Selected Features
+
+The following columns will be used as input features:
+
+Type
+Air temperature [K]
+Process temperature [K]
+Rotational speed [rpm]
+Torque [Nm]
+Tool wear [min]
+Target
+Target
+
+Target = 0 → No Failure
+
+Target = 1 → Failure
+
+Excluded Columns
+Column	Reason for Exclusion
+UDI	Identifier; does not represent machine operating condition
+Product ID	Identifier; not used as a direct machine-condition feature
+Failure Type	Contains information directly related to the failure outcome and may cause target leakage
+Important ML Consideration
+
+Failure Type will not be used as an input feature because it describes the type of failure associated with the observation. Using it to predict Target could allow the model to indirectly access information about the outcome.
+
+Therefore, the model will learn from machine characteristics and operating conditions rather than from the recorded failure description.
+
+Final Modeling Structure
+
+Input Features (X):
+
+Type
+Air temperature [K]
+Process temperature [K]
+Rotational speed [rpm]
+Torque [Nm]
+Tool wear [min]
+
+Target (y):
+
+Target
+
+
+Train-Test Split
+-----------------
+Question:
+
+How should the dataset be divided before model training?
+
+Objective:
+
+Split the dataset into training and testing sets so that the model can learn from one portion of the data and be evaluated on unseen data.
+
+Approach:
+
+The dataset was divided into:
+
+80% training data
+20% testing data
+
+The stratify=y parameter was used to maintain a similar proportion of failure and non-failure observations in both sets.
+
+Why Stratification?
+
+The target variable is highly imbalanced:
+
+Target 0 → 96.52%
+Target 1 → 3.48%
+
+Since failure observations are relatively rare, stratification helps preserve the class distribution in both training and testing datasets.
+
+Why Split Before Preprocessing?
+
+The train-test split is performed before scaling or other preprocessing steps to prevent information from the test set from influencing the training process.
+
+Preprocessing parameters will be learned only from the training data and then applied to the test data.
+
+Split:
+Original Dataset
+10,000 records
+       ↓
+Train-Test Split
+       ↓
+┌──────────────┬──────────────┐
+│ Training     │ Testing      │
+│ 80%          │ 20%          │
+│ 8,000 rows   │ 2,000 rows   │
+└──────────────┴──────────────┘
+ML Implication:
+
+The training set is used to learn patterns, while the test set provides an unbiased evaluation of how the final model performs on unseen observations.
+
+Business Implication:
+
+Evaluating the model on unseen machine records helps determine whether the predictive maintenance system can potentially identify failures beyond the data used for model training.
+
+
+
+14. Data Preprocessing
+Question:
+
+How should the selected features be transformed before model training?
+
+Objective:
+
+Prepare the numerical and categorical features so that they can be effectively used by machine learning algorithms.
+
+Numerical Features:
+Air temperature [K]
+Process temperature [K]
+Rotational speed [rpm]
+Torque [Nm]
+Tool wear [min]
+Categorical Feature:
+Type
+1. Categorical Encoding
+
+The Type feature contains three categories:
+
+L
+M
+H
+
+One-Hot Encoding is used to convert these categorical values into numerical features.
+
+One-Hot Encoding is preferred because the categories do not represent a numerical order.
+
+2. Numerical Scaling
+
+StandardScaler is applied to the numerical features.
+
+Standardization transforms the features using:
+
+[
+z = \frac{x-\mu}{\sigma}
+]
+
+This produces features with approximately zero mean and unit standard deviation.
+
+Why Scaling?
+
+The numerical features have different ranges. For example, rotational speed is measured in thousands of RPM, while torque and temperature have much smaller numerical ranges.
+
+Scaling prevents differences in numerical magnitude from disproportionately affecting scale-sensitive algorithms.
+
+3. Preventing Data Leakage
+
+The preprocessing transformations are fitted only on the training data.
+
+X_train
+   ↓
+fit + transform
+   ↓
+Processed X_train
+
+X_test
+   ↓
+transform only
+   ↓
+Processed X_test
+
+This prevents information from the test dataset from influencing the preprocessing process.
+
+Final Preprocessing
+Feature Type	Transformation
+Numerical features	StandardScaler
+Categorical feature	OneHotEncoder
+Unknown categories during testing	Ignored using handle_unknown='ignore'
+ML Implication:
+
+The preprocessing step converts all model inputs into a suitable numerical representation while preventing test-set information from leaking into the training process.
+
+
+## 15. Handling Class Imbalance
+
+### Question:
+
+Is the target variable balanced between the failure and non-failure classes?
+
+### Observation:
+
+The target distribution is highly imbalanced:
+
+| Target | Meaning    | Percentage |
+| ------ | ---------- | ---------: |
+| 0      | No Failure |     96.52% |
+| 1      | Failure    |      3.48% |
+
+Only 348 out of 10,000 observations belong to the failure class.
+
+### Problem:
+
+A model that predicts `No Failure` for almost every observation could achieve high accuracy while failing to detect actual machine failures.
+
+Therefore, accuracy alone is not sufficient to evaluate the predictive maintenance model.
+
+### Important Evaluation Metrics:
+
+The following metrics will be considered during model evaluation:
+
+* Precision
+* Recall
+* F1-score
+* Confusion Matrix
+* ROC-AUC
+
+Recall for the failure class will receive particular attention because false negatives represent actual failures that the model fails to identify.
+
+However, precision must also be considered because too many false alarms can result in unnecessary maintenance actions.
+
+### Approach:
+
+For the initial baseline model, class weighting will be used to give greater importance to the minority failure class.
+
+For example:
+
+```python
+class_weight='balanced'
+```
+
+This allows the model to account for the class imbalance without artificially creating or removing observations.
+
+### Data Leakage Consideration:
+
+The test set will remain untouched during imbalance handling.
+
+```text
+Train-Test Split
+       ↓
+Training Data → Handle imbalance / class weighting
+       ↓
+Model Training
+       ↓
+Untouched Test Data → Final Evaluation
+```
+
+### ML Implication:
+
+Because machine failures are rare, the model must be evaluated based on its ability to distinguish failure from non-failure rather than relying only on overall accuracy.
+
+### Business Implication:
+
+A useful predictive maintenance system should identify machines at risk while also controlling unnecessary maintenance alerts. Both missed failures and false alarms can have operational and financial consequences.
+
+
+
+16. # 16. Baseline Model — Logistic Regression
+
+## Objective
+
+Build a simple baseline classification model to predict whether a machine is likely to experience a failure.
+
+## Why Logistic Regression?
+
+Logistic Regression was selected as the baseline model because the target variable is binary:
+
+* `0` → No Failure
+* `1` → Failure
+
+It is simple, fast, interpretable, and provides probability estimates.
+
+## Class Imbalance Handling
+
+The dataset contains significantly fewer failure cases than non-failure cases. Therefore, `class_weight='balanced'` was used to give more importance to the minority failure class during training.
+
+## Model Training
+
+The Logistic Regression model was trained using the preprocessed training data.
+
+The test dataset was kept separate and was used only for evaluating the trained model.
+
+## Prediction
+
+The trained model was used to generate:
+
+* Class predictions using `predict()`
+* Failure probabilities using `predict_proba()`
+
+## Evaluation Metrics
+
+The model was evaluated using:
+
+* Confusion Matrix
+* Precision
+* Recall
+* F1-score
+* ROC-AUC
+
+Special attention was given to the `Target = 1` class because correctly detecting actual machine failures is important in predictive maintenance.
+
+## Initial Interpretation
+
+The baseline model provides a reference point for future machine learning models.
+
+The confusion matrix helps identify false positives and false negatives, while precision, recall and F1-score provide a better understanding of failure detection performance than accuracy alone.
+
+ROC-AUC measures the model's ability to distinguish between failure and non-failure cases across different classification thresholds.
+
+The baseline results will be used for comparison with more advanced models such as Decision Tree, Random Forest and SVM.
+
+
+
+17. 
+
+                Predicted
+                0       1
+
+Actual  0      1593    339
+        1        12     56
+
+TN = 1593
+FP = 339
+FN = 12
+TP = 56
+
+56 out of 68 actual failures.
+
+Recall = 56 / 68
+       = 82.35%
+
+This is the strongest part of your baseline.
+82% of actual machine failures.
+
+| Metric    |   Result | Interpretation                   |
+| --------- | -------  | -------------------------------- |
+| Precision | **0.14** | Many false alarms                |
+| Recall    | **0.82** | Detects most actual failures     |
+| F1        | **0.24** | Precision-recall balance is weak |
+
+
+Precision = 0.14 ⚠️
+
+This is the biggest weakness.
+
+A lot of alerts are false alarms.
+
+F1 = 0.24
+
+Because precision is very low, the F1-score is also low.
+
+
+# 16.12 Baseline Model Results — Logistic Regression
+
+## Confusion Matrix
+
+The Logistic Regression model produced:
+
+* True Negatives (TN) = 1593
+* False Positives (FP) = 339
+* False Negatives (FN) = 12
+* True Positives (TP) = 56
+
+## Failure Detection
+
+There were 68 actual failure cases in the test set.
+
+The model correctly detected 56 of them and missed 12.
+
+Therefore, the recall for the failure class is approximately 82%.
+
+This indicates that the model is able to detect most of the actual machine failures.
+
+## False Alarms
+
+The model produced 339 false positives.
+
+This means many machines were predicted as failures even though they did not actually fail.
+
+As a result, the precision for the failure class is only 14%.
+
+This indicates that the model generates a relatively high number of false alarms.
+
+## F1-score
+
+The F1-score for the failure class is 0.24.
+
+The low F1-score is mainly caused by the low precision, despite the relatively high recall.
+
+## Accuracy
+
+The overall accuracy is 82%.
+
+However, accuracy is not considered the primary metric because the dataset is highly imbalanced, with failure cases representing only a small proportion of the data.
+
+## ROC-AUC
+
+The ROC-AUC score is 0.907.
+
+This indicates that the Logistic Regression model has good ability to distinguish between failure and non-failure cases across different classification thresholds.
+
+## Overall Interpretation
+
+The baseline Logistic Regression model has good failure detection capability, with approximately 82% recall and 0.907 ROC-AUC.
+
+However, the model produces many false alarms, resulting in low failure precision of 14%.
+
+Therefore, the baseline model is sensitive to potential failures but not sufficiently precise.
+
+Further improvement should focus on balancing failure detection with the number of false alarms.
+
+The baseline model will be used as a reference for comparing more advanced models and for studying probability threshold tuning.
+
+
+
+17.17. Classification Threshold and Precision-Recall Trade-off
+What is a Classification Threshold?
+
+A classification model such as Logistic Regression first produces a probability for the positive class.
+
+In this project, the positive class is:
+
+Target = 1 → Machine Failure
+
+By default, a probability threshold of 0.50 is used to convert probabilities into class predictions.
+
+Probability < 0.50 → No Failure
+Probability ≥ 0.50 → Failure
+Why is Threshold Tuning Important?
+
+The default threshold is not always the best threshold for a business problem.
+
+Changing the threshold changes the balance between precision and recall.
+
+Lower Threshold
+
+A lower threshold makes the model more likely to classify a machine as a potential failure.
+
+This generally increases recall but can also increase false positives and reduce precision.
+
+Higher Threshold
+
+A higher threshold makes the model more conservative when predicting failures.
+
+This can reduce false positives and improve precision, but may also increase false negatives and reduce recall.
+
+Predictive Maintenance Trade-off
+
+For predictive maintenance:
+
+False Negative → Actual failure is missed.
+False Positive → Unnecessary maintenance alert.
+
+Therefore, the threshold should be selected based on the business cost of missed failures versus unnecessary maintenance.
+
+Current Baseline
+
+At the default threshold of 0.50:
+
+Precision for failure = 0.14
+Recall for failure = 0.82
+F1-score for failure = 0.24
+ROC-AUC = 0.907
+
+The baseline model detects most actual failures but generates many false alarms.
+
+Therefore, different classification thresholds will be evaluated to identify a more suitable precision-recall balance.

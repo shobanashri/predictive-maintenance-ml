@@ -1,0 +1,20 @@
+Basic questions
+1. What is the project about?
+2. What was the business problem?
+3. What dataset did you use?
+4. What was your target variable?
+5. Why did you choose this ML problem?
+Intermediate
+6. How did you handle missing values?
+7. How did you handle categorical variables?
+8. How did you detect outliers?
+9. How did you prevent data leakage?
+10. Why did you choose your evaluation metric?
+11. Why did you choose your final model?
+Advanced
+12. How would you deploy this model?
+13. How would you handle real-time sensor data?
+14. How would you monitor model performance?
+15. What happens if machine behavior changes?
+16. How would you retrain the model?
+17. What would you do if false negatives are very expensive?

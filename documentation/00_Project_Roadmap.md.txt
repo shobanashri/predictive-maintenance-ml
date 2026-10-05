@@ -1,0 +1,69 @@
+PROJECT 1 — PREDICTIVE MAINTENANCE - [✓]
+
+PHASE 1 — Business Understanding
+[ ] Business problem
+[ ] Business objective
+[ ] Stakeholders
+[ ] Business questions
+[ ] ML problem formulation
+
+PHASE 2 — Data Understanding
+[ ] Download dataset
+[ ] Understand columns
+[ ] Data types
+[ ] Missing values
+[ ] Duplicates
+[ ] Target distribution
+[ ] Numerical features
+[ ] Categorical features
+
+PHASE 3 — EDA
+[ ] Univariate analysis
+[ ] Bivariate analysis
+[ ] Multivariate analysis
+[ ] Target analysis
+[ ] Correlation
+[ ] Outliers
+[ ] Important findings
+
+PHASE 4 — Preprocessing
+[ ] Handle missing values
+[ ] Encode categorical features
+[ ] Feature engineering
+[ ] Scaling if required
+[ ] Train/test split
+[ ] Build preprocessing pipeline
+
+PHASE 5 — Modeling
+[ ] Baseline
+[ ] Model 1
+[ ] Model 2
+[ ] Model 3
+[ ] Cross-validation
+[ ] Hyperparameter tuning
+[ ] Model comparison
+[ ] Final model
+
+PHASE 6 — Production
+[ ] Save model
+[ ] Prediction pipeline
+[ ] API
+[ ] Streamlit UI
+[ ] Testing
+[ ] Deployment
+
+PHASE 7 — Portfolio
+[ ] README
+[ ] Architecture diagram
+[ ] Screenshots
+[ ] requirements.txt
+[ ] .gitignore
+[ ] Git commits
+[ ] GitHub repository
+
+PHASE 8 — Interview
+[ ] 2-minute explanation
+[ ] 5-minute explanation
+[ ] Technical questions
+[ ] Business questions
+[ ] Scenario questions
